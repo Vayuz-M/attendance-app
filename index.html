@@ -20,19 +20,17 @@
             margin-bottom: 20px;
         }
 
-        /* The Grid Container */
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); /* 4 Columns like the image */
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
             width: 100%;
             max-width: 400px;
             margin-bottom: 20px;
         }
 
-        /* The Buttons */
         .roll-btn {
-            background-color: #e0e0e0; /* Grey for Present */
+            background-color: #e0e0e0;
             border: 1px solid #ccc;
             border-radius: 8px;
             padding: 15px 0;
@@ -42,18 +40,15 @@
             cursor: pointer;
             text-align: center;
             transition: all 0.2s;
-            user-select: none; /* Prevents text selection on double tap */
-            -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
 
-        /* Red Style for Absent */
         .roll-btn.absent {
-            background-color: #ff4d4d; /* Red */
+            background-color: #ff4d4d;
             color: white;
             border-color: #ff0000;
         }
 
-        /* Section Header for LEs */
         .section-header {
             grid-column: span 4;
             text-align: center;
@@ -64,7 +59,6 @@
             font-weight: bold;
         }
 
-        /* Action Area */
         .action-area {
             width: 100%;
             max-width: 400px;
@@ -83,17 +77,16 @@
         }
 
         #generateBtn {
-            background-color: #1976D2; /* Blue */
+            background-color: #1976D2;
             color: white;
         }
 
         #copyBtn {
-            background-color: #4CAF50; /* Green */
+            background-color: #4CAF50;
             color: white;
-            display: none; /* Hidden until generated */
+            display: none;
         }
 
-        /* Output Text Box */
         textarea {
             width: 100%;
             height: 150px;
@@ -103,18 +96,16 @@
             border: 1px solid #ccc;
             font-family: monospace;
             resize: none;
-            display: none; /* Hidden until generated */
-            box-sizing: border-box; /* Fix padding issues */
+            display: none;
+            box-sizing: border-box;
         }
-
     </style>
 </head>
 <body>
 
     <h2>III CSE AIML C</h2>
 
-    <div class="grid-container" id="rollGrid">
-        </div>
+    <div class="grid-container" id="rollGrid"></div>
 
     <div class="action-area">
         <button id="generateBtn" class="btn-main" onclick="generateMessage()">Generate msg</button>
@@ -123,109 +114,99 @@
     </div>
 
     <script>
-        // 1. Define the Data
         const regularRolls = [
-        "D3","D4","D5","D6","D7","D8","D9",
-        "E0","E1","E2","E3","E4","E5","E6","E7","E8","E9",
-        "F0","F1","F2","F3","F4","F5","F6","F7","F8","F9",
-        "G0","G1","G2","G3","G4","G5","G6","G7","G8","G9",
-        "H0","H1","H2","H3","H4","H5","H6","H7","H8","H9",
-        "J0","J1","J3","J4","J5","J6","J7","J8","J9",
-        "K0","K1","K2","K3","K4","K5","K6","K7","K8"
+            "D3","D4","D5","D6","D7","D8","D9",
+            "E0","E1","E2","E3","E4","E5","E6","E7","E8","E9",
+            "F0","F1","F2","F3","F4","F5","F6","F7","F8","F9",
+            "G0","G1","G2","G3","G4","G5","G6","G7","G8","G9",
+            "H0","H1","H2","H3","H4","H5","H6","H7","H8","H9",
+            "J0","J1","J3","J4","J5","J6","J7","J8","J9",
+            "K0","K1","K2","K3","K4","K5","K6","K7","K8"
         ];
 
-        const lateralRolls = [
-            "15", "16", "17","18","19"
-        ];
+        const lateralRolls = ["15","16","17","18","19"];
 
         const grid = document.getElementById('rollGrid');
-        let totalCount = regularRolls.length + lateralRolls.length;
+        const totalCount = regularRolls.length + lateralRolls.length;
 
-        // 2. Function to create buttons
         function createButtons() {
-            // Add Regulars
             regularRolls.forEach(roll => {
                 const btn = document.createElement('button');
                 btn.className = 'roll-btn';
                 btn.innerText = roll;
-                btn.onclick = () => toggleAbsent(btn);
+                btn.onclick = () => btn.classList.toggle('absent');
                 grid.appendChild(btn);
             });
 
-            // Add Divider for LEs
-            const separator = document.createElement('div');
-            separator.className = 'section-header';
-            separator.innerText = "--- Lateral Entries (LE's) ---";
-            grid.appendChild(separator);
+            const divider = document.createElement('div');
+            divider.className = 'section-header';
+            divider.innerText = "--- Lateral Entries (LE's) ---";
+            grid.appendChild(divider);
 
-            // Add LEs
             lateralRolls.forEach(roll => {
                 const btn = document.createElement('button');
                 btn.className = 'roll-btn';
                 btn.innerText = roll;
-                btn.onclick = () => toggleAbsent(btn);
+                btn.onclick = () => btn.classList.toggle('absent');
                 grid.appendChild(btn);
             });
         }
 
-        // 3. Toggle Logic (Red/Grey)
-        function toggleAbsent(btn) {
-            btn.classList.toggle('absent');
+        function getSession() {
+            const now = new Date();
+            const minutes = now.getHours() * 60 + now.getMinutes();
+
+            const FN_start = 9*60 + 10;
+            const FN_end   = 12*60 + 10;
+
+            const AN_start = 12*60 + 50;
+            const AN_end   = 15*60 + 50;
+
+            if (minutes >= FN_start && minutes <= FN_end) return "FN";
+            if (minutes >= AN_start && minutes <= AN_end) return "AN";
+            return "";
         }
 
-        // 4. Generate Message Logic
         function generateMessage() {
-            // Find all buttons that have the 'absent' class
-            const absentButtons = document.querySelectorAll('.roll-btn.absent');
-            
-            // Get the text from those buttons
-            const absenteesList = Array.from(absentButtons).map(btn => btn.innerText);
-            
-            const absentCount = absenteesList.length;
-            const presentCount = totalCount - absentCount;
+            const sessionLabel = getSession();
 
-            // Get Today's Date
+            const absentees = Array.from(document.querySelectorAll('.roll-btn.absent'))
+                                    .map(btn => btn.innerText);
+
+            const absent = absentees.length;
+            const present = totalCount - absent;
+
             const today = new Date();
-            const dateStr = today.getDate().toString().padStart(2, '0') + '/' + 
-                            (today.getMonth() + 1).toString().padStart(2, '0') + '/' + 
-                            today.getFullYear();
+            const dateStr = 
+                String(today.getDate()).padStart(2,'0') + "/" +
+                String(today.getMonth()+1).padStart(2,'0') + "/" +
+                today.getFullYear();
 
-            // Construct the Message Format
-            let message = `III CSE AIML C\n Absentees :\n${dateStr}\n\n`;
-            
-            if (absentCount > 0) {
-                message += absenteesList.join(', ');
-            } else {
-                message += "None";
-            }
+            const sessionText = sessionLabel ? `${sessionLabel} Absentees :` : "Absentees :";
 
-            message += `\n\nAbsent - ${absentCount}\nPresent - ${presentCount}\nTotal - ${totalCount}`;
+            const msg =
+                `III CSE AIML C\n${dateStr} ${sessionText} ` +
+                (absent > 0 ? absentees.join(' ') : "None") +
+                `\nAbsent - ${absent}\nPresent - ${present}\nTotal - ${totalCount}`;
 
-            // Show output
-            const outputBox = document.getElementById('outputBox');
-            outputBox.style.display = 'block';
-            outputBox.value = message;
+            const output = document.getElementById('outputBox');
+            output.style.display = "block";
+            output.value = msg;
 
-            document.getElementById('copyBtn').style.display = 'block';
-            
-            // Scroll to bottom
+            document.getElementById('copyBtn').style.display = "block";
+
             window.scrollTo(0, document.body.scrollHeight);
         }
 
-        // 5. Copy to Clipboard Logic
         function copyText() {
-            const outputBox = document.getElementById('outputBox');
-            outputBox.select();
-            outputBox.setSelectionRange(0, 99999); // For mobile devices
-
-            navigator.clipboard.writeText(outputBox.value).then(() => {
-                alert("Message Copied!");
-            });
+            const output = document.getElementById('outputBox');
+            output.select();
+            navigator.clipboard.writeText(output.value);
+            alert("Message Copied!");
         }
 
-        // Initialize
         createButtons();
-
     </script>
+
 </body>
 </html>
