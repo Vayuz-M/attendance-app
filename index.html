@@ -140,7 +140,7 @@
 
             const divider = document.createElement('div');
             divider.className = 'section-header';
-            divider.innerText = "--- Lateral Entries (LE's) ---";
+            divider.innerText = "--- Lateral Entries ---";
             grid.appendChild(divider);
 
             lateralRolls.forEach(roll => {
@@ -173,11 +173,28 @@
             const absentees = Array.from(document.querySelectorAll('.roll-btn.absent'))
                                     .map(btn => btn.innerText);
 
+            // Separate regular & LE absentees
+            const leAbsent = absentees.filter(r => lateralRolls.includes(r));
+            const regularAbsent = absentees.filter(r => !lateralRolls.includes(r));
+
+            // Create final absentee list
+            const finalAbsentees = [];
+
+            // Add regular absentees normally
+            if (regularAbsent.length > 0) {
+                finalAbsentees.push(...regularAbsent);
+            }
+
+            // Add LE group ONE TIME
+            if (leAbsent.length > 0) {
+                finalAbsentees.push("LE - " + leAbsent.join(" "));
+            }
+
             const absent = absentees.length;
             const present = totalCount - absent;
 
             const today = new Date();
-            const dateStr = 
+            const dateStr =
                 String(today.getDate()).padStart(2,'0') + "/" +
                 String(today.getMonth()+1).padStart(2,'0') + "/" +
                 today.getFullYear();
@@ -186,7 +203,7 @@
 
             const msg =
                 `III CSE AIML C\n${dateStr} ${sessionText} ` +
-                (absent > 0 ? absentees.join(' ') : "None") +
+                (finalAbsentees.length > 0 ? finalAbsentees.join(' ') : "None") +
                 `\nAbsent - ${absent}\nPresent - ${present}\nTotal - ${totalCount}`;
 
             const output = document.getElementById('outputBox');
